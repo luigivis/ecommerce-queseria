@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Role: ADMIN | OPERADOR
+// TipoOrden: COMPRAR | COTIZAR
+// EstadoOrden: PENDIENTE | CONFIRMADA | EN_PREPARACION | ENTREGADA | CANCELADA
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN")
+  nombre       String
+  createdAt    DateTime @default(now())
+}
+
+model Categoria {
+  id        String     @id @default(cuid())
+  nombre    String     @unique
+  slug      String     @unique
+  productos Producto[]
+  createdAt DateTime   @default(now())
+}
+
+model Producto {
+  id            String     @id @default(cuid())
+  slug          String     @unique
+  nombre        String
+  descripcion   String
+  precio        Float
+  stock         Int        @default(0)
+  imagenes      String     @default("[]")
+  categoriaId   String
+  categoria     Categoria  @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
+  activo        Boolean    @default(true)
+  destacado     Boolean    @default(false)
+  enPromocion   Boolean    @default(false)
+  descuentoPct  Float?
+  unidad        String     @default("unidad")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  movimientos   MovimientoStock[]
+
+  @@index([categoriaId, activo])
+  @@index([activo, destacado])
+}
+
+model MovimientoStock {
+  id         String   @id @default(cuid())
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  tipo       String
+  cantidad   Int
+  referencia String?
+  createdAt  DateTime @default(now())
+
+  @@index([productoId])
+}
+
+model PuntoOrigen {
+  id        String   @id @default(cuid())
+  nombre    String
+  lat       Float
+  lng       Float
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model RangoDelivery {
+  id      String  @id @default(cuid())
+  desdeKm Float
+  hastaKm Float
+  costo   Float
+  orden   Int     @default(0)
+}
+
+model Orden {
+  id            String       @id @default(cuid())
+  numero        Int          @unique
+  tipo          String
+  estado        String       @default("PENDIENTE")
+  items         String
+  subtotal      Float
+  costoDelivery Float        @default(0)
+  distanciaKm   Float        @default(0)
+  total         Float
+  cliente       String
+  ubicacion     String
+  notas         String?
+  puntoOrigenId String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([estado])
+  @@index([tipo])
+}
+
+model Configuracion {
+  id                  Int      @id @default(1)
+  nombreSitio         String   @default("Quesería")
+  logoUrl             String?
+  telefonoWhatsapp    String   @default("50588888888")
+  plantillaComprar    String   @default("Hola, quiero comprar:\n\n{{productos}}\n\nTotal: {{total}}\nDirección: {{direccion}}\nMi nombre: {{nombre}}\nOrden #{{numero_orden}}")
+  plantillaCotizar    String   @default("Hola, quiero cotizar:\n\n{{productos}}\n\nSubtotal: {{subtotal}}\nDirección: {{direccion}}\nMi nombre: {{nombre}}\nOrden #{{numero_orden}}")
+  colores             String   @default("{\"primary\":\"234 88 12\",\"onPrimary\":\"255 255 255\",\"secondary\":\"249 115 22\",\"accent\":\"37 99 235\",\"background\":\"255 247 237\",\"foreground\":\"15 23 42\",\"muted\":\"253 244 240\",\"border\":\"252 234 225\",\"destructive\":\"220 38 38\"}")
+  textoHero           String   @default("Quesos artesanales de la mejor calidad")
+  subtituloHero       String   @default("Hechos con tradición, entregados a tu puerta en Nicaragua.")
+  textoDestacados     String   @default("Productos destacados")
+  camposCliente       String   @default("{\"nombre\":{\"label\":\"Tu nombre\",\"requerido\":true},\"telefono\":{\"label\":\"Tu teléfono (WhatsApp)\",\"requerido\":true},\"email\":{\"label\":\"Tu correo (opcional)\",\"requerido\":false},\"notas\":{\"label\":\"Notas para la entrega (opcional)\",\"requerido\":false}}")
+  moneda              String   @default("C$")
+  updatedAt           DateTime @updatedAt
+}
