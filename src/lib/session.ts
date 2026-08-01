@@ -3,7 +3,7 @@ import type { SessionOptions } from "iron-session";
 export interface SessionData {
   userId?: string;
   email?: string;
-  role?: "ADMIN" | "OPERADOR";
+  role?: "ADMIN" | "OPERADOR" | "VENDEDOR";
 }
 
 export const sessionOptions: SessionOptions = {
