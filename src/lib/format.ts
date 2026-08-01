@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export function slugify(text: string): string {
   return text
     .toString()
@@ -11,6 +13,7 @@ export function slugify(text: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export function formatPrice(value: number, moneda: string = "C$"): string {
-  return `${moneda} ${value.toFixed(2)}`;
+export function formatPrice(value: Prisma.Decimal | number | null | undefined, moneda: string = "C$"): string {
+  const n = typeof value === "number" ? value : (value?.toNumber() ?? 0);
+  return `${moneda} ${n.toFixed(2)}`;
 }

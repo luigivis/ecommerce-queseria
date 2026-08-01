@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getConfiguracion } from "@/lib/site";
 import { ProductDetail } from "@/components/storefront/ProductDetail";
 import type { Metadata } from "next";
-import { formatPrice } from "@/lib/format";
+import { toNumber } from "@/lib/decimal";
 
 export const dynamic = "force-dynamic";
 
@@ -24,10 +24,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const cfg = await getConfiguracion();
   const imgs: string[] = JSON.parse(p.imagenes || "[]");
   const ogImage = imgs[0] || cfg.logoUrl || undefined;
-  const precioFinal =
+const precioFinal =
     p.enPromocion && p.descuentoPct
-      ? p.precio * (1 - p.descuentoPct / 100)
-      : p.precio;
+      ? toNumber(p.precio) * (1 - toNumber(p.descuentoPct) / 100)
+      : toNumber(p.precio);
   return {
     title: p.nombre,
     description: p.descripcion.slice(0, 160),
@@ -50,8 +50,8 @@ export default async function ProductoPage({ params }: PageProps) {
   const imgs: string[] = JSON.parse(producto.imagenes || "[]");
   const precioFinal =
     producto.enPromocion && producto.descuentoPct
-      ? producto.precio * (1 - producto.descuentoPct / 100)
-      : producto.precio;
+      ? toNumber(producto.precio) * (1 - toNumber(producto.descuentoPct) / 100)
+      : toNumber(producto.precio);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -63,7 +63,7 @@ export default async function ProductoPage({ params }: PageProps) {
     brand: { "@type": "Brand", name: cfg.nombreSitio },
     offers: {
       "@type": "Offer",
-      price: precioFinal.toFixed(2),
+      price: toNumber(precioFinal).toFixed(2),
       priceCurrency: "NIO",
       availability:
         producto.stock > 0

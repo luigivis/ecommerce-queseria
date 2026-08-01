@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { calcularContraPuntos } from "@/lib/delivery";
+import { toNumber } from "@/lib/decimal";
 
 const schema = z.object({
   lat: z.number().min(-90).max(90),
@@ -24,15 +25,15 @@ export async function POST(req: NextRequest) {
       puntos.map((p) => ({
         id: p.id,
         nombre: p.nombre,
-        lat: p.lat,
-        lng: p.lng,
+        lat: toNumber(p.lat),
+        lng: toNumber(p.lng),
         activo: p.activo,
       })),
       rangos.map((r) => ({
         id: r.id,
-        desdeKm: r.desdeKm,
-        hastaKm: r.hastaKm,
-        costo: r.costo,
+        desdeKm: toNumber(r.desdeKm),
+        hastaKm: toNumber(r.hastaKm),
+        costo: toNumber(r.costo),
         orden: r.orden,
       })),
     );

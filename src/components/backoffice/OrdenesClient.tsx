@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { Prisma } from "@prisma/client";
 import { formatPrice } from "@/lib/format";
+import { toNumber } from "@/lib/decimal";
 import { Check, X, Trash2, ChevronDown, ChevronRight, MessageCircle, Phone, MapPin } from "lucide-react";
 
 interface Orden {
@@ -9,11 +11,11 @@ interface Orden {
   numero: number;
   tipo: string;
   estado: string;
-  subtotal: number;
-  costoDelivery: number;
-  distanciaKm: number;
-  total: number;
-  items: { productoId: string; nombre: string; cantidad: number; precio: number }[];
+  subtotal: Prisma.Decimal | number;
+  costoDelivery: Prisma.Decimal | number;
+  distanciaKm: Prisma.Decimal | number;
+  total: Prisma.Decimal | number;
+  items: { productoId: string; nombre: string; cantidad: number; precio: Prisma.Decimal | number }[];
   cliente: { nombre?: string; telefono?: string; email?: string };
   ubicacion: { lat?: number; lng?: number; direccion?: string; referencias?: string };
   notas: string | null;
@@ -102,7 +104,7 @@ export function OrdenesClient({ ordenes, moneda }: { ordenes: Orden[]; moneda: s
                 <span className="font-bold">#{o.numero}</span>
                 <span className="badge">{o.tipo}</span>
                 <span className={`badge ${estadoColor(o.estado)}`}>{o.estado.replace("_", " ")}</span>
-                <span className="ml-auto font-semibold">{formatPrice(o.total, moneda)}</span>
+                <span className="ml-auto font-semibold">{formatPrice(toNumber(o.total), moneda)}</span>
                 <span className="text-xs text-foreground/60 hidden sm:inline">
                   {new Date(o.createdAt).toLocaleString("es-NI", { dateStyle: "short", timeStyle: "short" })}
                 </span>
@@ -143,7 +145,7 @@ export function OrdenesClient({ ordenes, moneda }: { ordenes: Orden[]; moneda: s
                           Ver en mapa ({o.ubicacion.lat.toFixed(4)}, {o.ubicacion.lng.toFixed(4)})
                         </a>
                       )}
-                      <p className="text-xs text-foreground/60 mt-1">{o.distanciaKm.toFixed(1)} km</p>
+                      <p className="text-xs text-foreground/60 mt-1">{toNumber(o.distanciaKm).toFixed(1)} km</p>
                     </div>
                   </div>
 
@@ -153,14 +155,14 @@ export function OrdenesClient({ ordenes, moneda }: { ordenes: Orden[]; moneda: s
                       {o.items.map((it, i) => (
                         <li key={i} className="flex justify-between gap-2">
                           <span>{it.cantidad} × {it.nombre}</span>
-                          <span className="font-medium">{formatPrice(it.cantidad * it.precio, moneda)}</span>
+                          <span className="font-medium">{formatPrice(it.cantidad * toNumber(it.precio), moneda)}</span>
                         </li>
                       ))}
                     </ul>
                     <div className="mt-2 pt-2 border-t border-border text-sm space-y-1">
-                      <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(o.subtotal, moneda)}</span></div>
-                      <div className="flex justify-between"><span>Envío</span><span>{formatPrice(o.costoDelivery, moneda)}</span></div>
-                      <div className="flex justify-between font-bold pt-1 border-t border-border"><span>Total</span><span>{formatPrice(o.total, moneda)}</span></div>
+                      <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(toNumber(o.subtotal), moneda)}</span></div>
+                      <div className="flex justify-between"><span>Envío</span><span>{formatPrice(toNumber(o.costoDelivery), moneda)}</span></div>
+                      <div className="flex justify-between font-bold pt-1 border-t border-border"><span>Total</span><span>{formatPrice(toNumber(o.total), moneda)}</span></div>
                     </div>
                   </div>
 

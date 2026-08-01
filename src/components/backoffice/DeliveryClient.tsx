@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { Prisma } from "@prisma/client";
 import { Plus, Trash2, X } from "lucide-react";
+import { toNumber } from "@/lib/decimal";
 
-interface Rango { id: string; desdeKm: number; hastaKm: number; costo: number; orden: number; }
+interface Rango { id: string; desdeKm: Prisma.Decimal | number; hastaKm: Prisma.Decimal | number; costo: Prisma.Decimal | number; orden: number; }
 
 export function DeliveryClient({ rangos }: { rangos: Rango[] }) {
   const [items, setItems] = useState(rangos);
@@ -66,9 +68,9 @@ export function DeliveryClient({ rangos }: { rangos: Rango[] }) {
           <tbody>
             {items.map((r) => (
               <tr key={r.id} className="border-t border-border">
-                <td className="px-4 py-3">{r.desdeKm} km</td>
-                <td className="px-4 py-3">{r.hastaKm} km</td>
-                <td className="px-4 py-3 font-semibold">C$ {r.costo.toFixed(2)}</td>
+                <td className="px-4 py-3">{toNumber(r.desdeKm)} km</td>
+                <td className="px-4 py-3">{toNumber(r.hastaKm)} km</td>
+                <td className="px-4 py-3 font-semibold">C$ {toNumber(r.costo).toFixed(2)}</td>
                 <td className="px-4 py-3 text-right">
                   <button
                     onClick={() => setEditing({ ...r })}
@@ -104,15 +106,15 @@ export function DeliveryClient({ rangos }: { rangos: Rango[] }) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="label">Desde (km)</label>
-                <input type="number" step="0.1" className="input" value={editing.desdeKm ?? 0} onChange={(e) => setEditing({ ...editing, desdeKm: parseFloat(e.target.value) || 0 })} />
+                <input type="number" step="0.1" className="input" value={editing.desdeKm === undefined ? 0 : toNumber(editing.desdeKm)} onChange={(e) => setEditing({ ...editing, desdeKm: parseFloat(e.target.value) || 0 })} />
               </div>
               <div>
                 <label className="label">Hasta (km)</label>
-                <input type="number" step="0.1" className="input" value={editing.hastaKm ?? 0} onChange={(e) => setEditing({ ...editing, hastaKm: parseFloat(e.target.value) || 0 })} />
+                <input type="number" step="0.1" className="input" value={editing.hastaKm === undefined ? 0 : toNumber(editing.hastaKm)} onChange={(e) => setEditing({ ...editing, hastaKm: parseFloat(e.target.value) || 0 })} />
               </div>
               <div className="col-span-2">
                 <label className="label">Costo (C$)</label>
-                <input type="number" step="0.01" className="input" value={editing.costo ?? 0} onChange={(e) => setEditing({ ...editing, costo: parseFloat(e.target.value) || 0 })} />
+                <input type="number" step="0.01" className="input" value={editing.costo === undefined ? 0 : toNumber(editing.costo)} onChange={(e) => setEditing({ ...editing, costo: parseFloat(e.target.value) || 0 })} />
               </div>
             </div>
             <button onClick={save} className="btn-primary w-full mt-5">Guardar</button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Prisma } from "@prisma/client";
 import { Search, X, Tag } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 
@@ -9,11 +10,11 @@ export interface CatalogoProducto {
   slug: string;
   nombre: string;
   descripcion: string;
-  precio: number;
+  precio: Prisma.Decimal | number;
   unidad: string;
   imagenes: string;
   enPromocion: boolean;
-  descuentoPct: number | null;
+  descuentoPct: Prisma.Decimal | number | null;
   destacado: boolean;
   categoriaId: string;
   categoriaNombre: string;

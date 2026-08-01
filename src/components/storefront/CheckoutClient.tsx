@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
+import { Prisma } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, MapPin, MessageCircle, ShoppingBag, Loader2 } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/format";
+import { toNumber, toNumberOrNull } from "@/lib/decimal";
 import { parseCamposCliente, type CamposCliente } from "@/lib/config";
 import { buildWhatsappUrl, renderPlantilla, type WhatsappVars } from "@/lib/whatsapp";
 
@@ -23,7 +25,7 @@ const MapPicker = dynamic(() => import("@/components/storefront/MapPicker"), {
 interface Props {
   camposCliente: string;
   moneda: string;
-  puntoInicial: { lat: number; lng: number };
+  puntoInicial: { lat: Prisma.Decimal | number; lng: Prisma.Decimal | number };
 }
 
 interface DeliveryInfo {
@@ -39,6 +41,7 @@ export function CheckoutClient({ camposCliente, moneda, puntoInicial }: Props) {
   const items = useCart((s) => s.items);
   const subtotal = useCart((s) => s.subtotal());
   const clear = useCart((s) => s.clear);
+  const puntoInicialNum = { lat: toNumber(puntoInicial.lat), lng: toNumber(puntoInicial.lng) };
 
   const campos: CamposCliente = parseCamposCliente(camposCliente);
   const [datos, setDatos] = useState<Record<string, string>>({});
@@ -211,7 +214,7 @@ export function CheckoutClient({ camposCliente, moneda, puntoInicial }: Props) {
 
             <MapPicker
               point={coords}
-              initialCenter={puntoInicial}
+              initialCenter={puntoInicialNum}
               onSelect={setCoords}
             />
 
@@ -270,14 +273,14 @@ export function CheckoutClient({ camposCliente, moneda, puntoInicial }: Props) {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm">
-                        Distancia: <strong>{delivery.distanciaKm?.toFixed(1)} km</strong>
+                        Distancia: <strong>{toNumberOrNull(delivery.distanciaKm)?.toFixed(1) ?? "0.0"} km</strong>
                       </p>
                       <p className="text-xs text-foreground/60">
                         Desde: {delivery.puntoOrigenNombre}
                       </p>
                     </div>
                     <span className="text-lg font-bold text-primary">
-                      {formatPrice(delivery.costo ?? 0, moneda)}
+                      {formatPrice(toNumber(delivery.costo), moneda)}
                     </span>
                   </div>
                 ) : (
@@ -314,12 +317,12 @@ export function CheckoutClient({ camposCliente, moneda, puntoInicial }: Props) {
               </div>
               <div className="flex justify-between">
                 <span>Envío</span>
-                <span>{delivery?.disponible ? formatPrice(delivery.costo ?? 0, moneda) : "—"}</span>
+                <span>{delivery?.disponible ? formatPrice(toNumber(delivery.costo), moneda) : "—"}</span>
               </div>
               <div className="flex justify-between text-base font-bold pt-2 border-t border-border">
                 <span>Total</span>
                 <span className="text-primary">
-                  {formatPrice(subtotal + (delivery?.disponible ? delivery.costo ?? 0 : 0), moneda)}
+                  {formatPrice(subtotal + (delivery?.disponible ? toNumber(delivery.costo) : 0), moneda)}
                 </span>
               </div>
             </div>

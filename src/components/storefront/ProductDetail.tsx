@@ -6,6 +6,7 @@ import { ShoppingCart, Plus, Minus, ChevronLeft, Tag, Truck } from "lucide-react
 import Link from "next/link";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/format";
+import { toNumber } from "@/lib/decimal";
 import type { Producto, Categoria } from "@prisma/client";
 
 export function ProductDetail({
@@ -23,8 +24,8 @@ export function ProductDetail({
 
   const precioFinal =
     producto.enPromocion && producto.descuentoPct
-      ? producto.precio * (1 - producto.descuentoPct / 100)
-      : producto.precio;
+      ? toNumber(producto.precio) * (1 - toNumber(producto.descuentoPct) / 100)
+      : toNumber(producto.precio);
 
   function handleAdd() {
     add({
@@ -32,7 +33,7 @@ export function ProductDetail({
       slug: producto.slug,
       nombre: producto.nombre,
       precio: precioFinal,
-      precioOriginal: producto.enPromocion ? producto.precio : undefined,
+      precioOriginal: producto.enPromocion ? toNumber(producto.precio) : undefined,
       unidad: producto.unidad,
       imagen: imagenes[0],
       cantidad: qty,
@@ -69,7 +70,7 @@ export function ProductDetail({
             {producto.enPromocion && (
               <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-destructive px-3 py-1.5 text-sm font-bold text-on-primary">
                 <Tag className="h-4 w-4" />
-                -{producto.descuentoPct}% oferta
+                -{toNumber(producto.descuentoPct)}% oferta
               </span>
             )}
           </div>
@@ -105,7 +106,7 @@ export function ProductDetail({
             </span>
             {producto.enPromocion && producto.descuentoPct && (
               <span className="text-lg text-foreground/50 line-through">
-                {formatPrice(producto.precio, moneda)}
+                {formatPrice(toNumber(producto.precio), moneda)}
               </span>
             )}
             <span className="text-foreground/60">/ {producto.unidad}</span>

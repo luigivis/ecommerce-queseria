@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { ShoppingBag, Package, CheckCircle2, Clock } from "lucide-react";
 import { formatPrice } from "@/lib/format";
+import { toNumber } from "@/lib/decimal";
 import { getConfiguracion } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -84,7 +85,7 @@ export default async function DashboardPage() {
                     <td className="py-2 pr-4">
                       <EstadoBadge estado={o.estado} />
                     </td>
-                    <td className="py-2 pr-4 font-semibold">{formatPrice(o.total, cfg.moneda)}</td>
+                    <td className="py-2 pr-4 font-semibold">{formatPrice(toNumber(o.total), cfg.moneda)}</td>
                     <td className="py-2 pr-4 text-foreground/60">
                       {new Date(o.createdAt).toLocaleString("es-NI", { dateStyle: "short", timeStyle: "short" })}
                     </td>

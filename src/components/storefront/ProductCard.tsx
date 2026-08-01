@@ -1,15 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Prisma } from "@prisma/client";
 import { Tag } from "lucide-react";
 import { formatPrice } from "@/lib/format";
+import { toNumber } from "@/lib/decimal";
 
 export interface ProductCardData {
   slug: string;
   nombre: string;
-  precio: number;
+  precio: Prisma.Decimal | number;
   imagenes: string;
   enPromocion: boolean;
-  descuentoPct: number | null;
+  descuentoPct: Prisma.Decimal | number | null;
   unidad: string;
 }
 
@@ -24,8 +26,8 @@ export function ProductCard({ producto }: { producto: ProductCardData }) {
 
   const precioFinal =
     producto.enPromocion && producto.descuentoPct
-      ? producto.precio * (1 - producto.descuentoPct / 100)
-      : producto.precio;
+      ? toNumber(producto.precio) * (1 - toNumber(producto.descuentoPct) / 100)
+      : toNumber(producto.precio);
 
   return (
     <Link
@@ -49,7 +51,7 @@ export function ProductCard({ producto }: { producto: ProductCardData }) {
         {producto.enPromocion && (
           <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-destructive px-2.5 py-1 text-xs font-bold text-on-primary">
             <Tag className="h-3 w-3" />
-            -{producto.descuentoPct}%
+            -{toNumber(producto.descuentoPct)}%
           </span>
         )}
       </div>
@@ -64,7 +66,7 @@ export function ProductCard({ producto }: { producto: ProductCardData }) {
           </span>
           {producto.enPromocion && producto.descuentoPct && (
             <span className="text-sm text-foreground/50 line-through">
-              {formatPrice(producto.precio)}
+              {formatPrice(toNumber(producto.precio))}
             </span>
           )}
         </div>

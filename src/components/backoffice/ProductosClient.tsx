@@ -2,7 +2,9 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import { Prisma } from "@prisma/client";
 import { Plus, Pencil, Trash2, X, Upload, Star, Tag, Loader2, GripVertical } from "lucide-react";
+import { toNumber } from "@/lib/decimal";
 
 interface Categoria { id: string; nombre: string; slug: string; }
 interface Producto {
@@ -10,7 +12,7 @@ interface Producto {
   slug: string;
   nombre: string;
   descripcion: string;
-  precio: number;
+  precio: Prisma.Decimal | number;
   stock: number;
   unidad: string;
   categoriaId: string;
@@ -18,7 +20,7 @@ interface Producto {
   activo: boolean;
   destacado: boolean;
   enPromocion: boolean;
-  descuentoPct: number | null;
+  descuentoPct: Prisma.Decimal | number | null;
 }
 
 type FormState = Omit<Producto, "id" | "slug"> & { id?: string };
@@ -189,13 +191,13 @@ export function ProductosClient({
                         <div className="font-medium truncate">{p.nombre}</div>
                         <div className="flex gap-1 mt-0.5">
                           {p.destacado && <span className="badge text-[10px] py-0.5"><Star className="h-3 w-3" />Destacado</span>}
-                          {p.enPromocion && <span className="badge text-[10px] py-0.5 bg-destructive/10 text-destructive"><Tag className="h-3 w-3" />-{p.descuentoPct}%</span>}
+                          {p.enPromocion && <span className="badge text-[10px] py-0.5 bg-destructive/10 text-destructive"><Tag className="h-3 w-3" />-{toNumber(p.descuentoPct)}%</span>}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3">{p.categoriaId && categorias.find(c => c.id === p.categoriaId)?.nombre}</td>
-                  <td className="px-4 py-3 font-semibold">C$ {p.precio.toFixed(2)}</td>
+                  <td className="px-4 py-3 font-semibold">C$ {toNumber(p.precio).toFixed(2)}</td>
                   <td className="px-4 py-3">{p.stock}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${p.activo ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-700"}`}>
@@ -244,7 +246,7 @@ export function ProductosClient({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
                 <label className="label">Precio</label>
-                <input type="number" step="0.01" className="input" value={editing.precio} onChange={(e) => setEditing({ ...editing, precio: parseFloat(e.target.value) || 0 })} />
+                <input type="number" step="0.01" className="input" value={toNumber(editing.precio)} onChange={(e) => setEditing({ ...editing, precio: parseFloat(e.target.value) || 0 })} />
               </div>
               <div>
                 <label className="label">Stock</label>
@@ -307,7 +309,7 @@ export function ProductosClient({
             {editing.enPromocion && (
               <div>
                 <label className="label">Descuento %</label>
-                <input type="number" min="1" max="99" className="input" value={editing.descuentoPct ?? ""} onChange={(e) => setEditing({ ...editing, descuentoPct: parseFloat(e.target.value) || null })} />
+                <input type="number" min="1" max="99" className="input" value={editing.descuentoPct === null ? "" : toNumber(editing.descuentoPct)} onChange={(e) => setEditing({ ...editing, descuentoPct: parseFloat(e.target.value) || null })} />
               </div>
             )}
             <div className="flex gap-2 pt-2">

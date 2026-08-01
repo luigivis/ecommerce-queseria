@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { Prisma } from "@prisma/client";
 import { Plus, Pencil, Trash2, X, MapPin } from "lucide-react";
+import { toNumber } from "@/lib/decimal";
 
-interface Punto { id: string; nombre: string; lat: number; lng: number; activo: boolean; }
+interface Punto { id: string; nombre: string; lat: Prisma.Decimal | number; lng: Prisma.Decimal | number; activo: boolean; }
 
 export function PuntosOrigenClient({ puntos }: { puntos: Punto[] }) {
   const [items, setItems] = useState(puntos);
@@ -63,7 +65,7 @@ export function PuntosOrigenClient({ puntos }: { puntos: Punto[] }) {
                 {p.activo ? "Activo" : "Inactivo"}
               </span>
             </div>
-            <p className="text-xs text-foreground/60">{p.lat.toFixed(5)}, {p.lng.toFixed(5)}</p>
+            <p className="text-xs text-foreground/60">{toNumber(p.lat).toFixed(5)}, {toNumber(p.lng).toFixed(5)}</p>
             <div className="flex gap-1 mt-auto pt-2">
               <button
                 onClick={() => setEditing({ ...p })}
@@ -104,11 +106,11 @@ export function PuntosOrigenClient({ puntos }: { puntos: Punto[] }) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Latitud</label>
-                  <input type="number" step="any" className="input" value={editing.lat ?? 0} onChange={(e) => setEditing({ ...editing, lat: parseFloat(e.target.value) || 0 })} />
+                  <input type="number" step="any" className="input" value={editing.lat === undefined ? 0 : toNumber(editing.lat)} onChange={(e) => setEditing({ ...editing, lat: parseFloat(e.target.value) || 0 })} />
                 </div>
                 <div>
                   <label className="label">Longitud</label>
-                  <input type="number" step="any" className="input" value={editing.lng ?? 0} onChange={(e) => setEditing({ ...editing, lng: parseFloat(e.target.value) || 0 })} />
+                  <input type="number" step="any" className="input" value={editing.lng === undefined ? 0 : toNumber(editing.lng)} onChange={(e) => setEditing({ ...editing, lng: parseFloat(e.target.value) || 0 })} />
                 </div>
               </div>
               <label className="flex items-center gap-2">
