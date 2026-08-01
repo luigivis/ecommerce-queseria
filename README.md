@@ -172,17 +172,54 @@ NEXT_PUBLIC_SITE_URL=  # URL pública para sitemap y JSON-LD
 NODE_ENV=          # development | production
 ```
 
-## Producción
+## Deploy en Railway
 
-```bash
-# Build
-npm run build
+Click en el botón para deployar con un click:
 
-# Arrancar
-npm run start
-```
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new)
 
-Para deployar: VPS con Node 18+, Nginx como reverse proxy, dominio y HTTPS. Las imágenes subidas van a `/public/uploads/` (considerar migrar a S3/Cloudflare R2 si necesitás escalar uploads).
+### Pasos
+
+1. Click en el botón de arriba.
+2. Conectar este repo.
+3. Agregar el plugin **Postgres** desde el dashboard de Railway.
+4. Linkear el plugin Postgres al servicio web (Railway inyecta `DATABASE_URL` automáticamente).
+5. En las variables de entorno del servicio web, setear `SESSION_PASSWORD` con un valor de 32+ caracteres. Generar uno con:
+   ```bash
+   openssl rand -hex 32
+   ```
+6. Deploy.
+
+### Variables de entorno
+
+| Variable | Origen | Descripción |
+|----------|--------|-------------|
+| `DATABASE_URL` | Auto (link Postgres) | Conexión a Postgres. |
+| `SESSION_PASSWORD` | Manual | 32+ chars. Firma la cookie de sesión. |
+| `NEXT_PUBLIC_SITE_URL` | Auto | Derivado de `RAILWAY_PUBLIC_DOMAIN` en `start.sh`. |
+| `NODE_ENV` | Auto | `production`. |
+
+Para dominio custom, setear `NEXT_PUBLIC_SITE_URL` manualmente en el dashboard.
+
+### Migraciones
+
+`prisma db push` corre automáticamente en cada arranque del container. No se necesitan migraciones manuales.
+
+### Seed
+
+Si la DB está vacía, el seed corre automáticamente la primera vez (admin + categorías + productos demo + puntos de origen + rangos de delivery). En redeploys subsecuentes se detecta que la DB ya está poblada y se saltea.
+
+### Primer login
+
+Tras el primer deploy, el admin se crea con las credenciales:
+- Email: `admin@queseria.test`
+- Password: `admin1234`
+
+**Cambialas inmediatamente** desde `/backoffice/perfil`.
+
+### Uploads
+
+Las imágenes subidas van a `/public/uploads/`, que es **efímero** en Railway. En cada redeploy se pierden. Para producción real, migrar a S3/Cloudflare R2 (fuera de scope de este deploy).
 
 ## Scripts
 
