@@ -200,3 +200,42 @@ describe("DELETE /api/usuarios/[id]", () => {
     );
   });
 });
+
+import { PUT as PUTPassword } from "@/app/api/usuarios/[id]/password/route";
+
+function makePasswordPut(body: unknown): Request {
+  return new Request("http://localhost/api/usuarios/u1/password", {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+describe("PUT /api/usuarios/[id]/password", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("responde 403 si no es ADMIN", async () => {
+    mockGetSession.mockResolvedValue({ userId: "u1", role: "OPERADOR" });
+    const res = await PUTPassword(makePasswordPut({ password: "nuevaclave1" }) as never, { params: { id: "u1" } });
+    expect(res.status).toBe(403);
+  });
+
+  it("responde 400 si password corto", async () => {
+    mockGetSession.mockResolvedValue({ userId: "admin", role: "ADMIN" });
+    const res = await PUTPassword(makePasswordPut({ password: "123" }) as never, { params: { id: "u1" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("actualiza password cuando es válido", async () => {
+    mockGetSession.mockResolvedValue({ userId: "admin", role: "ADMIN" });
+    mockUserUpdateForTask3.mockResolvedValue({ id: "u1" });
+    const res = await PUTPassword(makePasswordPut({ password: "nuevaclave1" }) as never, { params: { id: "u1" } });
+    expect(res.status).toBe(200);
+    expect(mockUserUpdateForTask3).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "u1" },
+        data: { passwordHash: "hashed:nuevaclave1" },
+      })
+    );
+  });
+});
