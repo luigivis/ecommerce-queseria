@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { OrdenesClient } from "@/components/backoffice/OrdenesClient";
 import { getConfiguracion } from "@/lib/site";
+import { toNumber } from "@/lib/decimal";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Órdenes" };
@@ -16,10 +17,10 @@ export default async function OrdenesPage() {
     numero: o.numero,
     tipo: o.tipo,
     estado: o.estado,
-    subtotal: o.subtotal,
-    costoDelivery: o.costoDelivery,
-    distanciaKm: o.distanciaKm,
-    total: o.total,
+    subtotal: toNumber(o.subtotal),
+    costoDelivery: toNumber(o.costoDelivery),
+    distanciaKm: toNumber(o.distanciaKm),
+    total: toNumber(o.total),
     items: JSON.parse(o.items || "[]") as Array<{ productoId: string; nombre: string; cantidad: number; precio: number }>,
     cliente: JSON.parse(o.cliente || "{}"),
     ubicacion: JSON.parse(o.ubicacion || "{}"),

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { toNumber } from "@/lib/decimal";
 import { PuntosOrigenClient } from "@/components/backoffice/PuntosOrigenClient";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,11 @@ export default async function PuntosOrigenPage() {
   return (
     <div className="p-6 sm:p-8">
       <PuntosOrigenClient puntos={puntos.map(p => ({
-        id: p.id, nombre: p.nombre, lat: p.lat, lng: p.lng, activo: p.activo
+        id: p.id,
+        nombre: p.nombre,
+        lat: toNumber(p.lat),
+        lng: toNumber(p.lng),
+        activo: p.activo,
       }))} />
     </div>
   );

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { toNumber } from "@/lib/decimal";
 import { ProductosClient } from "@/components/backoffice/ProductosClient";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,8 @@ export default async function ProductosPage() {
       <ProductosClient
         productos={productos.map((p) => ({
           ...p,
+          precio: toNumber(p.precio),
+          descuentoPct: p.descuentoPct === null ? null : toNumber(p.descuentoPct),
           imagenes: JSON.parse(p.imagenes || "[]"),
         }))}
         categorias={categorias}
