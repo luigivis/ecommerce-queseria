@@ -10,6 +10,7 @@ import {
   Settings,
   MapPin,
   Truck,
+  User,
 } from "lucide-react";
 
 export default async function BackofficeLayout({
@@ -28,6 +29,7 @@ export default async function BackofficeLayout({
     { href: "/backoffice/puntos-origen", icon: MapPin, label: "Puntos de origen" },
     { href: "/backoffice/delivery", icon: Truck, label: "Delivery" },
     { href: "/backoffice/configuracion", icon: Settings, label: "Configuración" },
+    { href: "/backoffice/perfil", icon: User, label: "Mi perfil" },
   ];
 
   return (
