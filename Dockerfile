@@ -20,6 +20,7 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
 
 RUN npx prisma generate && \
     npm run build
