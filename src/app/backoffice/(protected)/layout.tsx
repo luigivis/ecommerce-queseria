@@ -11,6 +11,7 @@ import {
   MapPin,
   Truck,
   User,
+  Users,
 } from "lucide-react";
 
 export default async function BackofficeLayout({
@@ -30,6 +31,9 @@ export default async function BackofficeLayout({
     { href: "/backoffice/delivery", icon: Truck, label: "Delivery" },
     { href: "/backoffice/configuracion", icon: Settings, label: "Configuración" },
     { href: "/backoffice/perfil", icon: User, label: "Mi perfil" },
+    ...(session.role === "ADMIN"
+      ? [{ href: "/backoffice/usuarios", icon: Users, label: "Usuarios" }]
+      : []),
   ];
 
   return (
