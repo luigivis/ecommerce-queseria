@@ -1,5 +1,6 @@
 import { getConfiguracion } from "@/lib/site";
 import { prisma } from "@/lib/db";
+import { toNumber } from "@/lib/decimal";
 import { CheckoutClient } from "@/components/storefront/CheckoutClient";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,10 @@ export default async function CheckoutPage() {
     <CheckoutClient
       camposCliente={cfg.camposCliente}
       moneda={cfg.moneda}
-      puntoInicial={{ lat: puntoPrincipal.lat, lng: puntoPrincipal.lng }}
+      puntoInicial={{
+        lat: toNumber(puntoPrincipal.lat),
+        lng: toNumber(puntoPrincipal.lng),
+      }}
     />
   );
 }

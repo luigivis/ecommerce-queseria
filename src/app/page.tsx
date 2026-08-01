@@ -2,12 +2,13 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getConfiguracion } from "@/lib/site";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { toNumber } from "@/lib/decimal";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const cfg = await getConfiguracion();
-  const [destacados, categorias] = await Promise.all([
+  const [destacadosRaw, categorias] = await Promise.all([
     prisma.producto.findMany({
       where: { activo: true, destacado: true },
       include: { categoria: true },
@@ -16,6 +17,12 @@ export default async function HomePage() {
     }),
     prisma.categoria.findMany({ orderBy: { nombre: "asc" } }),
   ]);
+
+  const destacados = destacadosRaw.map((p) => ({
+    ...p,
+    precio: toNumber(p.precio),
+    descuentoPct: p.descuentoPct === null ? null : toNumber(p.descuentoPct),
+  }));
 
   return (
     <>

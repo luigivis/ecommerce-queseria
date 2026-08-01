@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { toNumber } from "@/lib/decimal";
 import { CatalogoClient } from "@/components/storefront/CatalogoClient";
 
 export const dynamic = "force-dynamic";
@@ -27,11 +28,11 @@ export default async function ProductosPage({ searchParams }: PageProps) {
     slug: p.slug,
     nombre: p.nombre,
     descripcion: p.descripcion,
-    precio: p.precio,
+    precio: toNumber(p.precio),
     unidad: p.unidad,
     imagenes: p.imagenes,
     enPromocion: p.enPromocion,
-    descuentoPct: p.descuentoPct,
+    descuentoPct: p.descuentoPct === null ? null : toNumber(p.descuentoPct),
     destacado: p.destacado,
     categoriaId: p.categoriaId,
     categoriaNombre: p.categoria?.nombre ?? "",

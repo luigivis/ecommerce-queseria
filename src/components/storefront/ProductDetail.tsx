@@ -14,7 +14,11 @@ export function ProductDetail({
   imagenes,
   moneda,
 }: {
-  producto: Producto & { categoria?: Categoria };
+  producto: Omit<Producto, "precio" | "descuentoPct"> & {
+    precio: number;
+    descuentoPct: number | null;
+    categoria?: Categoria;
+  };
   imagenes: string[];
   moneda: string;
 }) {

@@ -44,14 +44,20 @@ const precioFinal =
 }
 
 export default async function ProductoPage({ params }: PageProps) {
-  const producto = await getProducto(params.slug);
-  if (!producto) notFound();
+  const productoRaw = await getProducto(params.slug);
+  if (!productoRaw) notFound();
   const cfg = await getConfiguracion();
-  const imgs: string[] = JSON.parse(producto.imagenes || "[]");
+  const imgs: string[] = JSON.parse(productoRaw.imagenes || "[]");
   const precioFinal =
-    producto.enPromocion && producto.descuentoPct
-      ? toNumber(producto.precio) * (1 - toNumber(producto.descuentoPct) / 100)
-      : toNumber(producto.precio);
+    productoRaw.enPromocion && productoRaw.descuentoPct
+      ? toNumber(productoRaw.precio) * (1 - toNumber(productoRaw.descuentoPct) / 100)
+      : toNumber(productoRaw.precio);
+
+  const producto = {
+    ...productoRaw,
+    precio: toNumber(productoRaw.precio),
+    descuentoPct: productoRaw.descuentoPct === null ? null : toNumber(productoRaw.descuentoPct),
+  };
 
   const jsonLd = {
     "@context": "https://schema.org",

@@ -3,13 +3,20 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { z } from "zod";
 import { slugify } from "@/lib/format";
+import { toNumber } from "@/lib/decimal";
 
 export async function GET() {
   const productos = await prisma.producto.findMany({
     include: { categoria: true },
     orderBy: { nombre: "asc" },
   });
-  return NextResponse.json(productos);
+  return NextResponse.json(
+    productos.map((p) => ({
+      ...p,
+      precio: toNumber(p.precio),
+      descuentoPct: p.descuentoPct === null ? null : toNumber(p.descuentoPct),
+    }))
+  );
 }
 
 const upsertSchema = z.object({
@@ -60,7 +67,11 @@ export async function POST(req: NextRequest) {
         descuentoPct: d.enPromocion ? d.descuentoPct ?? null : null,
       },
     });
-    return NextResponse.json(updated);
+    return NextResponse.json({
+      ...updated,
+      precio: toNumber(updated.precio),
+      descuentoPct: updated.descuentoPct === null ? null : toNumber(updated.descuentoPct),
+    });
   }
   const created = await prisma.producto.create({
     data: {
@@ -78,5 +89,9 @@ export async function POST(req: NextRequest) {
       descuentoPct: d.enPromocion ? d.descuentoPct ?? null : null,
     },
   });
-  return NextResponse.json(created);
+  return NextResponse.json({
+    ...created,
+    precio: toNumber(created.precio),
+    descuentoPct: created.descuentoPct === null ? null : toNumber(created.descuentoPct),
+  });
 }
