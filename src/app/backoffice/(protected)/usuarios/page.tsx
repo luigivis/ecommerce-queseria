@@ -28,12 +28,13 @@ export default async function UsuariosPage() {
 
   const data = usuarios.map((u) => ({
     ...u,
+    role: u.role as "ADMIN" | "OPERADOR" | "VENDEDOR",
     createdAt: u.createdAt.toISOString(),
   }));
 
   return (
     <div className="p-6 sm:p-8">
-      <UsuariosClient usuarios={data} currentUserId={session.userId} />
+      <UsuariosClient usuarios={data} currentUserId={session.userId!} />
     </div>
   );
 }
