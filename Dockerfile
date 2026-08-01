@@ -20,10 +20,8 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV DATABASE_URL="file:/tmp/build.db"
 
 RUN npx prisma generate && \
-    npx prisma db push --skip-generate && \
     npm run build
 
 FROM node:20-bookworm-slim AS runner
@@ -37,10 +35,9 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-ENV DATABASE_URL="file:/app/prisma/data/queseria.db"
 
 COPY --from=builder /app/package.json ./package.json
-RUN npm install --omit=dev --no-audit --no-fund --ignore-scripts prisma@5.22.0 && npm cache clean --force
+RUN npm install --omit=dev --no-audit --no-fund --ignore-scripts prisma@5.22.0 tsx@4.19.2 && npm cache clean --force
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
@@ -52,13 +49,14 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder --chmod=755 /app/start.sh ./start.sh
+COPY --from=builder /app/scripts ./scripts
 
-RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public/uploads && \
-    mkdir -p /app/prisma/data && chown -R nextjs:nodejs /app/prisma/data
+RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public/uploads
 
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node server.js"]
+CMD ["sh", "start.sh"]
 
