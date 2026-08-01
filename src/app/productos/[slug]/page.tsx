@@ -4,18 +4,12 @@ import { getConfiguracion } from "@/lib/site";
 import { ProductDetail } from "@/components/storefront/ProductDetail";
 import type { Metadata } from "next";
 import { toNumber } from "@/lib/decimal";
+import { toAbsoluteUrl, resolveOgImage } from "@/lib/url";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: { slug: string };
-}
-
-function toAbsoluteUrl(path: string | null | undefined, baseUrl: string): string | undefined {
-  if (!path) return undefined;
-  if (path.startsWith("http")) return path;
-  const base = baseUrl.replace(/\/$/, "");
-  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 async function getProducto(slug: string) {
@@ -29,13 +23,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const p = await getProducto(params.slug);
   if (!p) return { title: "Producto no encontrado" };
   const cfg = await getConfiguracion();
-  const imgs: string[] = JSON.parse(p.imagenes || "[]");
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const fallbackUrl = `${baseUrl.replace(/\/$/, "")}/og-default.png`;
-  const ogImage =
-    toAbsoluteUrl(imgs[0], baseUrl) ||
-    toAbsoluteUrl(cfg.logoUrl, baseUrl) ||
-    fallbackUrl;
+  const ogImage = resolveOgImage(p.imagenes, cfg.logoUrl, baseUrl);
   const precioFinal =
     p.enPromocion && p.descuentoPct
       ? toNumber(p.precio) * (1 - toNumber(p.descuentoPct) / 100)
