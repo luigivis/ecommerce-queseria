@@ -34,8 +34,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
 
 COPY --from=builder /app/package.json ./package.json
 RUN npm install --omit=dev --no-audit --no-fund --ignore-scripts prisma@5.22.0 tsx@4.19.2 && npm cache clean --force
