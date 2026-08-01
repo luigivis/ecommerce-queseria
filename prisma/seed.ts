@@ -17,6 +17,7 @@ async function main() {
         passwordHash: hash,
         nombre: "Administrador",
         role: "ADMIN",
+        activo: true,
       },
     });
     console.log(`Admin creado: ${adminEmail} / ${adminPassword}`);
