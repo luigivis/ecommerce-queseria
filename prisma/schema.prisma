@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -33,7 +33,7 @@ model Producto {
   slug          String     @unique
   nombre        String
   descripcion   String
-  precio        Float
+  precio        Decimal
   stock         Int        @default(0)
   imagenes      String     @default("[]")
   categoriaId   String
@@ -41,7 +41,7 @@ model Producto {
   activo        Boolean    @default(true)
   destacado     Boolean    @default(false)
   enPromocion   Boolean    @default(false)
-  descuentoPct  Float?
+  descuentoPct  Decimal?
   unidad        String     @default("unidad")
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
@@ -66,17 +66,17 @@ model MovimientoStock {
 model PuntoOrigen {
   id        String   @id @default(cuid())
   nombre    String
-  lat       Float
-  lng       Float
+  lat       Decimal
+  lng       Decimal
   activo    Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 
 model RangoDelivery {
   id      String  @id @default(cuid())
-  desdeKm Float
-  hastaKm Float
-  costo   Float
+  desdeKm Decimal
+  hastaKm Decimal
+  costo   Decimal
   orden   Int     @default(0)
 }
 
@@ -86,10 +86,10 @@ model Orden {
   tipo          String
   estado        String       @default("PENDIENTE")
   items         String
-  subtotal      Float
-  costoDelivery Float        @default(0)
-  distanciaKm   Float        @default(0)
-  total         Float
+  subtotal      Decimal
+  costoDelivery Decimal      @default(0)
+  distanciaKm   Decimal      @default(0)
+  total         Decimal
   cliente       String
   ubicacion     String
   notas         String?
