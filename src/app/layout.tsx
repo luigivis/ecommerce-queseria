@@ -8,6 +8,8 @@ import { Header } from "@/components/storefront/Header";
 import { Footer } from "@/components/storefront/Footer";
 import { CartDrawer } from "@/components/storefront/CartDrawer";
 
+export const dynamic = "force-dynamic";
+
 const display = Amatic_SC({
   weight: ["400", "700"],
   subsets: ["latin"],
