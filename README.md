@@ -143,6 +143,30 @@ src/
 - OpenGraph + Twitter Card en cada página.
 - Idioma declarado como `es-NI`.
 
+### Open Graph (preview al compartir)
+
+Cada ficha de producto expone `og:image` con URL absoluta. La cadena de fallback:
+
+1. Primera imagen del producto (`Producto.imagenes[0]`).
+2. Logo del sitio (`Configuracion.logoUrl`).
+3. Placeholder estático en `/og-default.png`.
+
+`NEXT_PUBLIC_SITE_URL` debe estar seteado en producción con la URL completa (ej: `https://ecommerce-queseria-production.up.railway.app`). Si no, las URLs del fallback apuntan a `http://localhost:3000` y los previews de Facebook/WhatsApp no resuelven.
+
+Para verificar: compartir una ficha en [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) o [Twitter Card Validator](https://cards-dev.twitter.com/validator).
+
+## Roles de usuario
+
+- **ADMIN** — Acceso completo. Único que puede gestionar usuarios desde `/backoffice/usuarios`.
+- **OPERADOR** — Gestiona productos, categorías, órdenes, etc. No ve `/backoffice/usuarios`.
+- **VENDEDOR** — Igual que OPERADOR por ahora. Reservado para un futuro POS de venta rápida.
+
+El admin inicial viene del seed:
+- Email: `admin@queseria.test`
+- Password: `admin1234`
+
+**Cambialas en `/backoffice/perfil`** apenas puedas. Para crear más usuarios, ingresá como ADMIN y andá a `/backoffice/usuarios`.
+
 ## Cálculo de delivery
 
 - Haversine contra todos los puntos de origen activos.
