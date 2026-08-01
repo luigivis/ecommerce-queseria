@@ -11,6 +11,13 @@ interface PageProps {
   params: { slug: string };
 }
 
+function toAbsoluteUrl(path: string | null | undefined, baseUrl: string): string | undefined {
+  if (!path) return undefined;
+  if (path.startsWith("http")) return path;
+  const base = baseUrl.replace(/\/$/, "");
+  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 async function getProducto(slug: string) {
   return prisma.producto.findUnique({
     where: { slug, activo: true },
@@ -23,8 +30,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!p) return { title: "Producto no encontrado" };
   const cfg = await getConfiguracion();
   const imgs: string[] = JSON.parse(p.imagenes || "[]");
-  const ogImage = imgs[0] || cfg.logoUrl || undefined;
-const precioFinal =
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const fallbackUrl = `${baseUrl.replace(/\/$/, "")}/og-default.png`;
+  const ogImage =
+    toAbsoluteUrl(imgs[0], baseUrl) ||
+    toAbsoluteUrl(cfg.logoUrl, baseUrl) ||
+    fallbackUrl;
+  const precioFinal =
     p.enPromocion && p.descuentoPct
       ? toNumber(p.precio) * (1 - toNumber(p.descuentoPct) / 100)
       : toNumber(p.precio);
@@ -35,7 +47,7 @@ const precioFinal =
       title: p.nombre,
       description: p.descripcion.slice(0, 160),
       type: "website",
-      images: ogImage ? [{ url: ogImage, alt: p.nombre }] : [],
+      images: [{ url: ogImage, alt: p.nombre }],
     },
     alternates: {
       canonical: `/productos/${p.slug}`,
@@ -48,6 +60,7 @@ export default async function ProductoPage({ params }: PageProps) {
   if (!productoRaw) notFound();
   const cfg = await getConfiguracion();
   const imgs: string[] = JSON.parse(productoRaw.imagenes || "[]");
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const precioFinal =
     productoRaw.enPromocion && productoRaw.descuentoPct
       ? toNumber(productoRaw.precio) * (1 - toNumber(productoRaw.descuentoPct) / 100)
@@ -59,12 +72,19 @@ export default async function ProductoPage({ params }: PageProps) {
     descuentoPct: productoRaw.descuentoPct === null ? null : toNumber(productoRaw.descuentoPct),
   };
 
+  const fallbackImages = [
+    toAbsoluteUrl(cfg.logoUrl, baseUrl) || `${baseUrl.replace(/\/$/, "")}/og-default.png`,
+  ];
+  const jsonLdImages = imgs.length > 0
+    ? imgs.map((i) => toAbsoluteUrl(i, baseUrl)).filter(Boolean) as string[]
+    : fallbackImages;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: producto.nombre,
     description: producto.descripcion,
-    image: imgs,
+    image: jsonLdImages,
     category: producto.categoria.nombre,
     brand: { "@type": "Brand", name: cfg.nombreSitio },
     offers: {
@@ -75,7 +95,7 @@ export default async function ProductoPage({ params }: PageProps) {
         producto.stock > 0
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/productos/${producto.slug}`,
+      url: `${baseUrl.replace(/\/$/, "")}/productos/${producto.slug}`,
       seller: { "@type": "Organization", name: cfg.nombreSitio },
     },
   };
